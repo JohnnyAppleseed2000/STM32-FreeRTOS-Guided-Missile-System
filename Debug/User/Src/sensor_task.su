@@ -1,0 +1,7 @@
+../User/Src/sensor_task.c:17:6:vTaskSensorScanner	48	static
+../User/Src/sensor_task.c:68:13:ServoMotorUpdate	16	static
+../User/Src/sensor_task.c:79:21:TrackTarget	56	static
+../User/Src/sensor_task.c:112:13:SensorTrigger	8	static
+../User/Src/sensor_task.c:120:13:us_delay	24	static
+../User/Src/sensor_task.c:129:17:distance_calculator	24	static
+../User/Src/sensor_task.c:140:6:HAL_TIM_IC_CaptureCallback	32	static,ignoring_inline_asm

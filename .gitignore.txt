@@ -1,0 +1,10 @@
+# Build artifacts
+Debug/
+*.o
+*.d
+*.elf
+*.list
+*.map
+
+#IDE files
+.settings/

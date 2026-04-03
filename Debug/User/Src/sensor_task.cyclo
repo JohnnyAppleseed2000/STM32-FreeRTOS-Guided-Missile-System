@@ -1,0 +1,7 @@
+../User/Src/sensor_task.c:17:6:vTaskSensorScanner	8
+../User/Src/sensor_task.c:68:13:ServoMotorUpdate	3
+../User/Src/sensor_task.c:79:21:TrackTarget	6
+../User/Src/sensor_task.c:112:13:SensorTrigger	1
+../User/Src/sensor_task.c:120:13:us_delay	2
+../User/Src/sensor_task.c:129:17:distance_calculator	1
+../User/Src/sensor_task.c:140:6:HAL_TIM_IC_CaptureCallback	4
