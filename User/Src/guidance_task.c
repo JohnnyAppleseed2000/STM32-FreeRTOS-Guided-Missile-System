@@ -5,6 +5,8 @@
  *      Author: johnh
  */
 
+#include "guidance_task.h"
+
 void vTaskGuidance(void *parameters)
 {
 	uint8_t received_data[4];
@@ -14,7 +16,6 @@ void vTaskGuidance(void *parameters)
 			// 데이터 파싱 및 날개 제어 로직 실행
 			uint16_t distance = (received_data[0] << 8) | received_data[1];
 			uint16_t angle = (received_data[2] << 8) | received_data[3];
-
 		}
 	}
 

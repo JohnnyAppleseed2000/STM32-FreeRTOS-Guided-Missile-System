@@ -1,0 +1,2 @@
+../User/Src/guidance_task.c:10:6:vTaskGuidance	24	static
+../User/Src/guidance_task.c:24:13:PID	16	static

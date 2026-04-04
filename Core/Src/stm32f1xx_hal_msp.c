@@ -17,6 +17,7 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
+
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 /* USER CODE BEGIN Includes */
@@ -78,7 +79,7 @@ void HAL_MspInit(void)
   __HAL_AFIO_REMAP_SWJ_NOJTAG();
 
   /* USER CODE BEGIN MspInit 1 */
-
+  HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   /* USER CODE END MspInit 1 */
 }
 
@@ -198,9 +199,8 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     __HAL_RCC_GPIOB_CLK_ENABLE();
     /**TIM4 GPIO Configuration
     PB6     ------> TIM4_CH1
-    PB7     ------> TIM4_CH2
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;
+    GPIO_InitStruct.Pin = GPIO_PIN_6;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -297,9 +297,8 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 
     /**TIM4 GPIO Configuration
     PB6     ------> TIM4_CH1
-    PB7     ------> TIM4_CH2
     */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6|GPIO_PIN_7);
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6);
 
     /* TIM4 interrupt DeInit */
     HAL_NVIC_DisableIRQ(TIM4_IRQn);

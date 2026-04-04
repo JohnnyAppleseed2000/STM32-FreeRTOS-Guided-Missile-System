@@ -23,6 +23,7 @@
 "./ThirdParty/FreeRTOS/croutine.o"
 "./ThirdParty/FreeRTOS/event_groups.o"
 "./ThirdParty/FreeRTOS/list.o"
+"./ThirdParty/FreeRTOS/queue.o"
 "./ThirdParty/FreeRTOS/stream_buffer.o"
 "./ThirdParty/FreeRTOS/tasks.o"
 "./ThirdParty/FreeRTOS/timers.o"

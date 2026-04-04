@@ -9,7 +9,7 @@
 
 static void SensorTrigger(void);
 static void us_delay(uint8_t);
-static void ServoMotorUpdate(uint16_t*, uint8_t*);
+static void ServoMotorUpdate(uint16_t*, uint16_t*);
 static SystemMode_t TrackTarget(uint16_t*, uint16_t*);
 static uint16_t distance_calculator(uint32_t);
 
@@ -17,13 +17,13 @@ static uint16_t distance_calculator(uint32_t);
 void vTaskSensorScanner(void* parameters)
 {
 	uint16_t current_angle = START_ANGLE;
-	uint8_t angle_step = ANGLE_STEP;
+	uint16_t angle_step = ANGLE_STEP;
 	BaseType_t status;
 	uint32_t ulNotificationValue;
 	SystemMode_t current_mode = MODE_SEARCH;
 
-	HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_2);
+	HAL_TIM_IC_Start(&htim4, TIM_CHANNEL_1);
 
 	for(;;)
 	{
@@ -33,12 +33,26 @@ void vTaskSensorScanner(void* parameters)
 			// 서브모터 위치 제어
 			ServoMotorUpdate(&current_angle, &angle_step);
 
+			vTaskDelay(pdMS_TO_TICKS(60));
+
 			// 센서 트리거
 			SensorTrigger();
 
 			// input capture 대기
 			status = xTaskNotifyWait(0, 0, &ulNotificationValue, pdMS_TO_TICKS(10));
+
+			//test
+			if (status == pdTRUE)
+			{
+				uint16_t distance = distance_calculator(ulNotificationValue);
+				if (distance <= SENSE_MAX_DISTANCE && distance > SENSE_MIN_DISTANCE)
+				{
+					HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+				}
+			}
+
 			// 거리 계산
+			/*
 			if (status == pdTRUE)
 			{
 				uint16_t distance = distance_calculator(ulNotificationValue);
@@ -47,25 +61,25 @@ void vTaskSensorScanner(void* parameters)
 					current_mode = MODE_LOCKON;	//표적 감지 (LOCK-ON)
 				}
 			}
-			// CPU 양보 및 측정 주기 확보 (매뉴얼 권장 60ms)
-			vTaskDelay(pdMS_TO_TICKS(60));
-		}else if( current_mode == MODE_LOCKON )
+			*/
+		}
+		else if( current_mode == MODE_LOCKON )
 		{
 			uint16_t final_dist = 0;
 			current_mode = TrackTarget(&current_angle, &final_dist);
 			if (current_mode == MODE_LOCKON )
 			{
-				if (CAN1_Tx(current_angle, final_dist) != HAL_OK)
+				if (CAN1_Tx(current_angle, final_dist, &hcan) != HAL_OK)
 				{
 					Error_Handler();
 				}
-				vTaskDelay(pdMS_TO_TICKS(40));
+				HAL_CAN_RxFifo0MsgPendingCallback(&hcan);
 			}
 		}
 	}
 }
 
-static void ServoMotorUpdate(uint16_t *angle, uint8_t *step)
+static void ServoMotorUpdate(uint16_t *angle, uint16_t *step)
 {
 	*angle += *step;
 	if (*angle >= MAX_PULSE || *angle <= MIN_PULSE)
@@ -73,7 +87,6 @@ static void ServoMotorUpdate(uint16_t *angle, uint8_t *step)
 		*step *= -1;	//끝에 도달하면 방향전환
 	}
 	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, *angle);
-	vTaskDelay(pdMS_TO_TICKS(60));
 }
 
 static SystemMode_t TrackTarget(uint16_t *angle, uint16_t *dist)
@@ -86,7 +99,7 @@ static SystemMode_t TrackTarget(uint16_t *angle, uint16_t *dist)
 	//오른쪽
 	uint16_t r_angle = *angle + track_step;
 	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, r_angle);
-	vTaskDelay(pdMS_TO_TICKS(60));
+	vTaskDelay(pdMS_TO_TICKS(30));
 	SensorTrigger();
 	rstatus = xTaskNotifyWait(0, 0, &ulRTrackValue, pdMS_TO_TICKS(10));
 	if(rstatus == pdTRUE)	r_dist = distance_calculator(ulRTrackValue);
@@ -94,7 +107,7 @@ static SystemMode_t TrackTarget(uint16_t *angle, uint16_t *dist)
 	//왼쪽
 	uint16_t l_angle = *angle - track_step;
 	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, l_angle);
-	vTaskDelay(pdMS_TO_TICKS(60));
+	vTaskDelay(pdMS_TO_TICKS(30));
 	SensorTrigger();
 	lstatus = xTaskNotifyWait(0, 0, &ulLTrackValue, pdMS_TO_TICKS(10));
 	if(lstatus == pdTRUE)	l_dist = distance_calculator(ulLTrackValue);
@@ -133,7 +146,6 @@ static uint16_t distance_calculator(uint32_t notified_value)
 
 	return distance;
 }
-
 
 
 // ISR : 타이머 캡쳐

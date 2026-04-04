@@ -24,6 +24,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "sensor_task.h"
+#include "queue.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,7 +50,10 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
+
 TaskHandle_t xSensorScannerHandle;
+TaskHandle_t xGuidanceHandle;
+QueueHandle_t xGuidanceQueue;
 
 /* USER CODE END PV */
 
@@ -61,7 +65,11 @@ static void MX_TIM4_Init(void);
 static void MX_CAN_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
+
 extern void vTaskSensorScanner(void* parameters);
+extern void vTaskGuidance(void* parameters);
+HAL_StatusTypeDef HAL_FilterConfiguration(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -103,9 +111,24 @@ int main(void)
   MX_CAN_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+  // 필터 설정
+  if (HAL_FilterConfiguration() != HAL_OK)
+  {
+	  Error_Handler();
+  }
+
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CYCCNT = 0;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 
+  xGuidanceQueue = xQueueCreate(4, sizeof(uint8_t));
+
   status = xTaskCreate(vTaskSensorScanner, "sensor_task", 250, NULL, 2, &xSensorScannerHandle);
+  configASSERT(status == pdTRUE);
+
+  status = xTaskCreate(vTaskGuidance, "guidance_task", 250, NULL, 3, &xGuidanceHandle);
   configASSERT(status == pdTRUE);
 
   vTaskStartScheduler();
@@ -345,8 +368,8 @@ static void MX_TIM4_Init(void)
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_SlaveConfigTypeDef sSlaveConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_IC_InitTypeDef sConfigIC = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   /* USER CODE BEGIN TIM4_Init 1 */
 
@@ -373,14 +396,9 @@ static void MX_TIM4_Init(void)
   sSlaveConfig.SlaveMode = TIM_SLAVEMODE_RESET;
   sSlaveConfig.InputTrigger = TIM_TS_TI1FP1;
   sSlaveConfig.TriggerPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
-  sSlaveConfig.TriggerFilter = 0;
+  sSlaveConfig.TriggerPrescaler = TIM_ICPSC_DIV1;
+  sSlaveConfig.TriggerFilter = 4;
   if (HAL_TIM_SlaveConfigSynchro(&htim4, &sSlaveConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
@@ -393,8 +411,14 @@ static void MX_TIM4_Init(void)
     Error_Handler();
   }
   sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
-  sConfigIC.ICFilter = 0;
+  sConfigIC.ICSelection = TIM_ICSELECTION_INDIRECTTI;
   if (HAL_TIM_IC_ConfigChannel(&htim4, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
@@ -428,12 +452,6 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(Trigger_GPIO_Port, Trigger_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pins : USART_TX_Pin USART_RX_Pin */
   GPIO_InitStruct.Pin = USART_TX_Pin|USART_RX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -454,18 +472,25 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(Trigger_GPIO_Port, &GPIO_InitStruct);
 
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+HAL_StatusTypeDef HAL_FilterConfiguration(void){
+	CAN_FilterTypeDef sFilterConfig;
 
+	sFilterConfig.FilterBank = 0;             // 0번 필터 뱅크 사용
+	sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK; // 마스크 모드
+	sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+	sFilterConfig.FilterIdHigh = (0x101 << 5); // 받고 싶은 ID (Left Aligned 11-bit)
+	sFilterConfig.FilterMaskIdHigh = 0xFFE0;   // 마스크 설정
+	sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+	sFilterConfig.FilterActivation = ENABLE;
 
+	return HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
+}
 
 /* USER CODE END 4 */
 
@@ -505,7 +530,8 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-#ifdef USE_FULL_ASSERT
+
+#ifdef  USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

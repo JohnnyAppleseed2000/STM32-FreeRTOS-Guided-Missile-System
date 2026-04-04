@@ -28,5 +28,6 @@ Drivers/STM32F1xx_HAL_Driver/Src \
 ThirdParty/FreeRTOS \
 ThirdParty/FreeRTOS/portable/GCC/ARM_CM3 \
 ThirdParty/FreeRTOS/portable/MemMang \
+User/Inc \
 User/Src \
 

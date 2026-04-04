@@ -1,5 +1,4 @@
-ThirdParty/FreeRTOS/stream_buffer.o: \
- ../ThirdParty/FreeRTOS/stream_buffer.c \
+ThirdParty/FreeRTOS/queue.o: ../ThirdParty/FreeRTOS/queue.c \
  C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/FreeRTOS.h \
  C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/FreeRTOSConfig.h \
  C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/projdefs.h \
@@ -9,7 +8,8 @@ ThirdParty/FreeRTOS/stream_buffer.o: \
  C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/mpu_wrappers.h \
  C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/task.h \
  C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/list.h \
- C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/stream_buffer.h
+ C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/queue.h \
+ C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/task.h
 C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/FreeRTOS.h:
 C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/FreeRTOSConfig.h:
 C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/projdefs.h:
@@ -19,4 +19,5 @@ C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/portable/GCC/A
 C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/mpu_wrappers.h:
 C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/task.h:
 C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/list.h:
-C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/stream_buffer.h:
+C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/queue.h:
+C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/ThirdParty/FreeRTOS/include/task.h:
