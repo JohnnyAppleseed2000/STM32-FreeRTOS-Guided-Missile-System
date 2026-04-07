@@ -19,6 +19,14 @@ typedef struct {
     char system_status[10]; // "FLYING", "HIT", "IDLE" 등
 } LCD_Data_t;
 
+// functions
+void LCD_Goto();
+void LCD_print();
+
+// LCD Macros
+#define LOCKON
+
+void vTaskLCD(void *parameters);
 extern QueueHandle_t xLCDQueue;
 
 

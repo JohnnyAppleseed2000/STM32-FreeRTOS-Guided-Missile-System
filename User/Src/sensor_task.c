@@ -41,7 +41,6 @@ void vTaskSensorScanner(void* parameters)
 				uint16_t distance = distance_calculator(ulNotificationValue);
 				if (distance <= SENSE_MAX_DISTANCE && distance > SENSE_MIN_DISTANCE)
 				{
-					HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 					current_mode = MODE_LOCKON;	//표적 감지 (LOCK-ON)
 					__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, current_angle);
 					continue;

@@ -1,8 +1,8 @@
 ../User/Src/sensor_task.c:18:6:vTaskSensorScanner	8
-../User/Src/sensor_task.c:70:13:ServoMotorUpdate	3
-../User/Src/sensor_task.c:80:21:TrackTarget	7
-../User/Src/sensor_task.c:117:21:QuickSearch	9
-../User/Src/sensor_task.c:168:13:SensorTrigger	1
-../User/Src/sensor_task.c:176:13:us_delay	2
-../User/Src/sensor_task.c:185:17:distance_calculator	1
-../User/Src/sensor_task.c:195:6:HAL_TIM_IC_CaptureCallback	4
+../User/Src/sensor_task.c:69:13:ServoMotorUpdate	3
+../User/Src/sensor_task.c:79:21:TrackTarget	7
+../User/Src/sensor_task.c:116:21:QuickSearch	9
+../User/Src/sensor_task.c:167:13:SensorTrigger	1
+../User/Src/sensor_task.c:175:13:us_delay	2
+../User/Src/sensor_task.c:184:17:distance_calculator	1
+../User/Src/sensor_task.c:194:6:HAL_TIM_IC_CaptureCallback	4
