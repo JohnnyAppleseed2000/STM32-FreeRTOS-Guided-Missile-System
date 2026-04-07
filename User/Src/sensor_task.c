@@ -12,6 +12,7 @@ static void us_delay(uint8_t);
 static void ServoMotorUpdate(uint16_t*, uint16_t*);
 static SystemMode_t TrackTarget(uint16_t*, uint16_t*);
 static uint16_t distance_calculator(uint32_t);
+static SystemMode_t QuickSearch(uint16_t *angle, uint16_t *dist);
 
 
 void vTaskSensorScanner(void* parameters)
@@ -30,17 +31,10 @@ void vTaskSensorScanner(void* parameters)
 		// 1. 정찰모드
 		if (current_mode == MODE_SEARCH)
 		{
-			// 서브모터 위치 제어
-			ServoMotorUpdate(&current_angle, &angle_step);
-
-			vTaskDelay(pdMS_TO_TICKS(60));
-
 			// 센서 트리거
 			SensorTrigger();
-
 			// input capture 대기
-			status = xTaskNotifyWait(0, 0, &ulNotificationValue, pdMS_TO_TICKS(10));
-
+			status = xTaskNotifyWait(0, 0, &ulNotificationValue, pdMS_TO_TICKS(30));
 			//test
 			if (status == pdTRUE)
 			{
@@ -48,23 +42,18 @@ void vTaskSensorScanner(void* parameters)
 				if (distance <= SENSE_MAX_DISTANCE && distance > SENSE_MIN_DISTANCE)
 				{
 					HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-				}
-			}
-
-			// 거리 계산
-			/*
-			if (status == pdTRUE)
-			{
-				uint16_t distance = distance_calculator(ulNotificationValue);
-				if (distance <= SENSE_MAX_DISTANCE && distance > SENSE_MIN_DISTANCE)
-				{
 					current_mode = MODE_LOCKON;	//표적 감지 (LOCK-ON)
+					__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, current_angle);
+					continue;
 				}
 			}
-			*/
+			// 서브모터 위치 제어
+			ServoMotorUpdate(&current_angle, &angle_step);
+			vTaskDelay(pdMS_TO_TICKS(60));
 		}
 		else if( current_mode == MODE_LOCKON )
 		{
+			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 			uint16_t final_dist = 0;
 			current_mode = TrackTarget(&current_angle, &final_dist);
 			if (current_mode == MODE_LOCKON )
@@ -73,7 +62,6 @@ void vTaskSensorScanner(void* parameters)
 				{
 					Error_Handler();
 				}
-				HAL_CAN_RxFifo0MsgPendingCallback(&hcan);
 			}
 		}
 	}
@@ -91,35 +79,90 @@ static void ServoMotorUpdate(uint16_t *angle, uint16_t *step)
 
 static SystemMode_t TrackTarget(uint16_t *angle, uint16_t *dist)
 {
-	uint8_t track_step = 50;
-	BaseType_t rstatus, lstatus;
-	uint32_t ulRTrackValue, ulLTrackValue;
-	uint16_t r_dist, l_dist;
+	uint32_t ulTrackValue;
+	static uint8_t initial_wait = 0; // LOCKON 진입 직후인지 확인
+	static uint8_t missing_count = 0;
 
-	//오른쪽
-	uint16_t r_angle = *angle + track_step;
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, r_angle);
-	vTaskDelay(pdMS_TO_TICKS(30));
-	SensorTrigger();
-	rstatus = xTaskNotifyWait(0, 0, &ulRTrackValue, pdMS_TO_TICKS(10));
-	if(rstatus == pdTRUE)	r_dist = distance_calculator(ulRTrackValue);
 
-	//왼쪽
-	uint16_t l_angle = *angle - track_step;
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, l_angle);
-	vTaskDelay(pdMS_TO_TICKS(30));
-	SensorTrigger();
-	lstatus = xTaskNotifyWait(0, 0, &ulLTrackValue, pdMS_TO_TICKS(10));
-	if(lstatus == pdTRUE)	l_dist = distance_calculator(ulLTrackValue);
-
-	if (r_dist < SENSE_MAX_DISTANCE || l_dist < SENSE_MAX_DISTANCE)
-	{
-		*angle = (r_dist <= l_dist) ? r_angle : l_angle;
-		*dist = (r_dist <= l_dist) ? r_dist : l_dist;
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, *angle);
-		return MODE_LOCKON;
+	// 처음 LOCKON 진입했을 때는 모터가 멈출 시간을 충분히 준다
+	if (initial_wait == 0) {
+		vTaskDelay(pdMS_TO_TICKS(80)); // 모터 진동이 멈출 때까지 대기
+		initial_wait = 1;
 	}
+
+	while(xTaskNotifyWait(0, 0, NULL, 0) == pdTRUE);
+
+	// 1. 표적이 감지되면 현재 각도 유지
+	SensorTrigger();
+	if ( xTaskNotifyWait(0 , 0, &ulTrackValue, pdMS_TO_TICKS(30)))
+	{
+		*dist = distance_calculator(ulTrackValue);
+		if (*dist <= SENSE_MAX_DISTANCE && *dist > SENSE_MIN_DISTANCE)
+		{
+			missing_count = 0;
+			return MODE_LOCKON;	// 유효거리안에 있으면 계속 LOCKON 유지
+		}
+	}
+	missing_count++;
+	// 표적이 15번 감지되지않을때
+	if (missing_count < 15) {
+		return MODE_LOCKON; // 아직은 제자리에서 더 기다려봄
+	} else {
+		missing_count = 0;
+		initial_wait = 0; // 다시 탐색 할 준비
+		return QuickSearch(angle, dist);
+	}
+}
+
+static SystemMode_t QuickSearch(uint16_t *angle, uint16_t *dist)
+{
+	uint8_t offset = 50;
+	uint32_t ulSearchValue;
+	uint16_t base_angle = *angle;
+	uint16_t temp_dist;
+	uint8_t search_trials = 0;
+
+	//총 3번 감지
+	for (int i = 0; i < 3; i++)
+	{
+		//오른쪽
+		uint16_t r_angle = (base_angle + offset > MAX_PULSE) ? MAX_PULSE : base_angle + offset;
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, r_angle);
+		vTaskDelay(pdMS_TO_TICKS(30));
+		SensorTrigger();
+		if (xTaskNotifyWait(0, 0, &ulSearchValue, pdMS_TO_TICKS(30)) == pdTRUE)
+		{
+			temp_dist = distance_calculator(ulSearchValue);
+			// 유효거리 안
+			if (temp_dist <= SENSE_MAX_DISTANCE && temp_dist > SENSE_MIN_DISTANCE)
+			{
+				*angle = r_angle;
+				*dist = temp_dist;
+				return MODE_LOCKON;
+			}
+		}
+
+		//왼쪽
+		uint16_t l_angle = (base_angle < MIN_PULSE + offset) ? MIN_PULSE : base_angle - offset;
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, l_angle);
+		vTaskDelay(pdMS_TO_TICKS(30));
+		SensorTrigger();
+		if ( xTaskNotifyWait(0, 0, &ulSearchValue, pdMS_TO_TICKS(30)) == pdTRUE)
+		{
+			temp_dist = distance_calculator(ulSearchValue);
+			if (temp_dist <= SENSE_MAX_DISTANCE && temp_dist > SENSE_MIN_DISTANCE)
+			{
+				*angle = l_angle;
+				*dist = temp_dist;
+				return MODE_LOCKON;
+			}
+		}
+		offset += 50;
+		search_trials++;
+	}
+	// 3번 빠른 탐색 이후 감지 못했으면 MODE_SERCH 반환
 	return MODE_SEARCH;
+
 }
 
 static void SensorTrigger(void)

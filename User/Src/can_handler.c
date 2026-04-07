@@ -23,6 +23,7 @@ HAL_StatusTypeDef CAN1_Tx(uint16_t curr_angle, uint16_t distance, CAN_HandleType
 	TxData[0] = (distance >> BIT_POS) & BIT_CONST;
 	// 하위 8 비트
 	TxData[1] = distance & BIT_CONST;
+
 	TxData[2] = (curr_angle >> BIT_POS) & (BIT_CONST);
 	TxData[3] = curr_angle & BIT_CONST;
 

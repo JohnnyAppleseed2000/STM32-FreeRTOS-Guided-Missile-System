@@ -5,19 +5,13 @@
  *      Author: johnh
  */
 
-
-typedef struct {
-    uint16_t Kp, Ki, Kd;       // 제어 이득
-    uint16_t target;           // 목표값 (예: 90도)
-    uint16_t error_sum;        // 적분항 누적값
-    uint16_t last_error;       // 이전 오차 (미분항 계산용)
-    uint16_t out_min, out_max; // 출력 제한 (서보모터 PWM 범위)
-    uint16_t i_limit;          // Anti-Windup 제한값
-} PID_TypeDef;
+#include "main.h"
+#include "pid_logic.h"
 
 // PID 계산 함수
-uint16_t PID_Compute(PID_TypeDef *pid, uint16_t current_angle) {
-     error = pid->target - current_val;
+uint16_t PID_Compute(PID_TypeDef *pid, uint16_t current_angle)
+{
+    uint16_t error = pid->target - current_angle;
 
     // P 항
     uint16_t p_out = pid->Kp * error;

@@ -18,11 +18,11 @@ void vTaskLCD(void *parameters)
 		// 주의: 매번 전체 화면을 지우면(Clear) 깜빡임이 심하므로,
 		// 바뀐 부분만 덮어쓰는 스킬이 필요합니다.
 
-		sprintf(buffer, "Dist: %4d mm", displayData.distance);
+		//sprintf(buffer, "Dist: %4d mm", displayData.distance);
 		LCD_Goto(0, 0);
 		LCD_Puts(buffer);
 
-		sprintf(buffer, "Ang : %4.1f deg", displayData.current_angle);
+		//sprintf(buffer, "Ang : %4.1f deg", displayData.current_angle);
 		LCD_Goto(0, 1);
 		LCD_Puts(buffer);
 		}

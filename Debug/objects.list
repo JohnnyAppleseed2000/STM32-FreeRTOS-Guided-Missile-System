@@ -31,4 +31,5 @@
 "./ThirdParty/FreeRTOS/portable/MemMang/heap_4.o"
 "./User/Src/can_handler.o"
 "./User/Src/guidance_task.o"
+"./User/Src/pid_logic.o"
 "./User/Src/sensor_task.o"

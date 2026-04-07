@@ -14,7 +14,7 @@
 
 #define BIT_POS		8
 #define BIT_CONST	0xFF
-#define CAN_ID_TARGET_DATA	0x101D;
+#define CAN_ID_TARGET_DATA	0x101;
 
 extern CAN_HandleTypeDef hcan;
 extern QueueHandle_t xGuidanceQueue;

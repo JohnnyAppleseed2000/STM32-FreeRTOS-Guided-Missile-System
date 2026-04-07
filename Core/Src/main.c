@@ -116,6 +116,8 @@ int main(void)
   {
 	  Error_Handler();
   }
+  HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+  HAL_CAN_Start(&hcan);
 
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
   DWT->CYCCNT = 0;
@@ -123,7 +125,7 @@ int main(void)
 
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 
-  xGuidanceQueue = xQueueCreate(4, sizeof(uint8_t));
+  xGuidanceQueue = xQueueCreate(10, sizeof(uint8_t) * 4);
 
   status = xTaskCreate(vTaskSensorScanner, "sensor_task", 250, NULL, 2, &xSensorScannerHandle);
   configASSERT(status == pdTRUE);
@@ -478,18 +480,27 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-HAL_StatusTypeDef HAL_FilterConfiguration(void){
-	CAN_FilterTypeDef sFilterConfig;
+HAL_StatusTypeDef HAL_FilterConfiguration(void) {
+    CAN_FilterTypeDef sFilterConfig = {0}; // ★ 1. 모든 필드를 0으로 초기화 (매우 중요)
 
-	sFilterConfig.FilterBank = 0;             // 0번 필터 뱅크 사용
-	sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK; // 마스크 모드
-	sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-	sFilterConfig.FilterIdHigh = (0x101 << 5); // 받고 싶은 ID (Left Aligned 11-bit)
-	sFilterConfig.FilterMaskIdHigh = 0xFFE0;   // 마스크 설정
-	sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-	sFilterConfig.FilterActivation = ENABLE;
+    sFilterConfig.FilterBank = 0;
+    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
 
-	return HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
+    // 2. 일단 모든 ID를 통과시키도록 0으로 설정 (Pass-All 모드)
+    sFilterConfig.FilterIdHigh = 0x0000;
+    sFilterConfig.FilterIdLow = 0x0000;
+    sFilterConfig.FilterMaskIdHigh = 0x0000;
+    sFilterConfig.FilterMaskIdLow = 0x0000;
+
+    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig.FilterActivation = ENABLE;
+
+    // 3. 만약 특정 ID(0x101)만 받고 싶다면 나중에 이렇게 수정해:
+    // sFilterConfig.FilterIdHigh = (0x101 << 5);
+    // sFilterConfig.FilterMaskIdHigh = 0xFFE0; // 정확히 0x101만 통과
+
+    return HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
 }
 
 /* USER CODE END 4 */
