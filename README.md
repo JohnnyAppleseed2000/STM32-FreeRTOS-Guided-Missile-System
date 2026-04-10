@@ -30,11 +30,13 @@
 
 ## 로직 에널라이저를 통한 주기와 CAN 통신 출력
 -**SEARCH_MODE**
+
 <img width="600" height="200" alt="echo trigger 주기" src="https://github.com/user-attachments/assets/be5e07d0-8b89-44bc-9a1b-4cc463a47f07" />
 
 -**LOCK-ON MODE**
 
 -**CAN 통신**
+
 <img width="1018" height="210" alt="can 통신" src="https://github.com/user-attachments/assets/2211b5f9-8dbc-4b0d-a878-384419e9b7e1" />
 
 
