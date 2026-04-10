@@ -6,5 +6,7 @@ Debug/
 *.list
 *.map
 
-#IDE files
+# IDE settings
 .settings/
+.project
+.cproject
