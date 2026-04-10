@@ -1,2 +1,0 @@
-../User/Src/can_handler.c:11:19:CAN1_Tx	48	static
-../User/Src/can_handler.c:33:6:HAL_CAN_RxFifo0MsgPendingCallback	56	static,ignoring_inline_asm
