@@ -23,11 +23,11 @@ extern TIM_HandleTypeDef htim4;
 // servo-motor macros
 #define START_ANGLE		1500U
 #define	ANGLE_STEP		50U
-#define MAX_PULSE		2500U
-#define MIN_PULSE		500U
+#define MAX_PULSE		2000U
+#define MIN_PULSE		1000U
 
 // sensor macros
-#define SENSE_MAX_DISTANCE	100U
+#define SENSE_MAX_DISTANCE	300U
 #define SENSE_MIN_DISTANCE	2U
 
 // quick search macro

@@ -39,11 +39,19 @@ void vTaskSensorScanner(void* parameters)
 			if (status == pdTRUE)
 			{
 				uint16_t distance = distance_calculator(ulNotificationValue);
+				if (distance == 0) continue;
 				if (distance <= SENSE_MAX_DISTANCE && distance > SENSE_MIN_DISTANCE)
 				{
 					current_mode = MODE_LOCKON;	//표적 감지 (LOCK-ON)
 					__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, current_angle);
 					continue;
+				}
+				else
+				{
+					if (CAN1_Tx(current_angle, distance, &hcan) != HAL_OK)
+					{
+						Error_Handler();
+					}
 				}
 			}
 			// 서브모터 위치 제어
@@ -82,7 +90,6 @@ static SystemMode_t TrackTarget(uint16_t *angle, uint16_t *dist)
 	static uint8_t initial_wait = 0; // LOCKON 진입 직후인지 확인
 	static uint8_t missing_count = 0;
 
-
 	// 처음 LOCKON 진입했을 때는 모터가 멈출 시간을 충분히 준다
 	if (initial_wait == 0) {
 		vTaskDelay(pdMS_TO_TICKS(80)); // 모터 진동이 멈출 때까지 대기
@@ -95,16 +102,22 @@ static SystemMode_t TrackTarget(uint16_t *angle, uint16_t *dist)
 	SensorTrigger();
 	if ( xTaskNotifyWait(0 , 0, &ulTrackValue, pdMS_TO_TICKS(30)))
 	{
-		*dist = distance_calculator(ulTrackValue);
-		if (*dist <= SENSE_MAX_DISTANCE && *dist > SENSE_MIN_DISTANCE)
+
+		uint16_t d = distance_calculator(ulTrackValue);
+
+		if (d==0)	return MODE_LOCKON;
+
+		if (d <= SENSE_MAX_DISTANCE && d > SENSE_MIN_DISTANCE)
 		{
 			missing_count = 0;
+			*dist = d;
+
 			return MODE_LOCKON;	// 유효거리안에 있으면 계속 LOCKON 유지
 		}
 	}
 	missing_count++;
 	// 표적이 15번 감지되지않을때
-	if (missing_count < 15) {
+	if (missing_count < 5) {
 		return MODE_LOCKON; // 아직은 제자리에서 더 기다려봄
 	} else {
 		missing_count = 0;
@@ -119,10 +132,9 @@ static SystemMode_t QuickSearch(uint16_t *angle, uint16_t *dist)
 	uint32_t ulSearchValue;
 	uint16_t base_angle = *angle;
 	uint16_t temp_dist;
-	uint8_t search_trials = 0;
 
 	//총 3번 감지
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		//오른쪽
 		uint16_t r_angle = (base_angle + offset > MAX_PULSE) ? MAX_PULSE : base_angle + offset;
@@ -156,8 +168,7 @@ static SystemMode_t QuickSearch(uint16_t *angle, uint16_t *dist)
 				return MODE_LOCKON;
 			}
 		}
-		offset += 50;
-		search_trials++;
+		offset += 20;
 	}
 	// 3번 빠른 탐색 이후 감지 못했으면 MODE_SERCH 반환
 	return MODE_SEARCH;

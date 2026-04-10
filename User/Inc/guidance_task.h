@@ -13,8 +13,11 @@
 #include "main.h"
 #include "can_handler.h"
 #include "pid_logic.h"
+#include "uart_task.h"
+#include "queue.h"
 
 void vTaskGuidance(void *parameters);
-extern TIM_HandleTypeDef htim4;
+extern TIM_HandleTypeDef htim1;
+extern QueueHandle_t xUARTQueue;
 
 #endif /* INC_GUIDANCE_TASK_H_ */

@@ -24,7 +24,8 @@ User/Src/pid_logic.o: ../User/Src/pid_logic.c ../Core/Inc/main.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
- C:/Users/johnh/isr_pgm_project/isr_pgm/User/Inc/pid_logic.h
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
+ C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/User/Inc/pid_logic.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -51,4 +52,5 @@ User/Src/pid_logic.o: ../User/Src/pid_logic.c ../Core/Inc/main.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
-C:/Users/johnh/isr_pgm_project/isr_pgm/User/Inc/pid_logic.h:
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
+C:/Users/John.DESKTOP-ACCU4EE/isr_pgm/isr_pgm/User/Inc/pid_logic.h:
