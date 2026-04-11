@@ -1,6 +1,6 @@
 #  Guided Missile System Simulator (STM32 & FreeRTOS)
 
-> **STM32F103RB** 환경에서 **FreeRTOS**를 활용하여 구현한 초음파 센서 기반 유도 제어 시스템입니다.
+> **STM32F103RB** 환경에서 **FreeRTOS**를 활용하여 구현한 초음파 센서를 활용한 PID 날개 제어 시스템입니다.
 
 ---
 
