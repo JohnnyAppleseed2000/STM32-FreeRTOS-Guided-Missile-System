@@ -26,7 +26,7 @@
 - **좌상단: 센서**
 - **좌하단: 날개**
 - **우하단: 결과 출력**
-  https://github.com/user-attachments/assets/616ef99a-52f3-412c-bb51-823e04e3723b
+- <video src=" https://github.com/user-attachments/assets/616ef99a-52f3-412c-bb51-823e04e3723b" controls="controls" style="max-width: 100%;"></video>
 
 ## 로직 에널라이저를 통한 주기와 CAN 통신 출력
 -**SEARCH_MODE**
