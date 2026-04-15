@@ -17,7 +17,7 @@ void vTaskUART(void *parameters)
 		// 1. 큐에서 최신 데이터를 기다림
 		if (xQueueReceive(xUARTQueue, &displayData, portMAX_DELAY) == pdPASS)
 		{
-			// 1. 화면 지우기 (ANSI Escape Code 사용 - 아래 설명 참고)
+			// 1. 화면 지우기
 			printf("\033[H\033[J");
 
 			if (displayData.mode == HIT || displayData.mode == LOCKON)

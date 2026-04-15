@@ -18,7 +18,7 @@ void vTaskGuidance(void *parameters)
 	static uint8_t search_timeout = 0;
 	static uint16_t last_valid_distance = 0;
 	static float filtered_dist = 0;
-	float alpha = 0.1f;
+	float alpha = 0.3f;
 	float output = 0;
 	float final_pwm = 0;
 
@@ -35,8 +35,8 @@ void vTaskGuidance(void *parameters)
 	hpid.target = GUIDANCE_TARGET_ANGLE;    // 타겟이 정중앙(90도)에 오도록 유도
 	hpid.error_sum = 0;
 	hpid.last_error = 0;
-	hpid.out_min = PID_OUT_MIN;     // 서보 최소 PWM (예: 0도)
-	hpid.out_max = PID_OUT_MAX;    // 서보 최대 PWM (예: 180도)
+	hpid.out_min = PID_OUT_MIN;     
+	hpid.out_max = PID_OUT_MAX;    
 	hpid.i_limit = PID_I_LIMIT;
 
 
@@ -44,7 +44,6 @@ void vTaskGuidance(void *parameters)
 	{
 		if (xQueueReceive(xGuidanceQueue, received_data, 0) == pdPASS)
 		{
-			// 데이터 파싱
 			uint16_t distance = (received_data[0] << 8) | received_data[1];
 			uint16_t angle = (received_data[2] << 8) | received_data[3];
 
@@ -80,7 +79,7 @@ void vTaskGuidance(void *parameters)
 			{
 				if (filtered_dist == 0) filtered_dist = (float)distance; // 초기값 설정
 
-				// 필터 공식: 이전 값 90% + 새 값 10% 섞기
+				// 필터 공식: 이전 값 70% + 새 값 30% 섞기
 				filtered_dist = (alpha * (float)distance) + ((1.0f - alpha) * filtered_dist);
 
 				float safe_distance = (filtered_dist < 80) ? 80.0f : (float)filtered_dist;
@@ -99,7 +98,7 @@ void vTaskGuidance(void *parameters)
 					hit_count++;
 				} else
 				{
-					hit_count = 0; // 80mm보다 확실히 멀어졌을 때만 리셋
+					hit_count = 0; // 60mm보다 확실히 멀어졌을 때만 리셋
 				}
 
 				if (hit_count >= 5)	mode = HIT;
@@ -109,7 +108,6 @@ void vTaskGuidance(void *parameters)
 			// 4. uart Task(100ms 마다 uart_task 실행)
 			if (uart_count >= 5 )
 			{
-				// LCD 구조체에 데이터 입력
 				huart.distance = distance;
 				huart.current_angle = angle;
 				huart.pid_output = (mode == SEARCH) ? 0 : final_pwm;

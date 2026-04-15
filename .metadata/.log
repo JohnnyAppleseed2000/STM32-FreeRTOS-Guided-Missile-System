@@ -1,0 +1,38 @@
+!SESSION 2026-04-11 22:14:20.012 -----------------------------------------------
+eclipse.buildId=Version 2.0.0
+java.version=21.0.8
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ko_KR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -data C:\Users\johnh\isr_pgm_project\isr_pgm
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2026-04-11 22:14:26.365
+!MESSAGE Log4j2 initialized with config file C:\Users\johnh\isr_pgm_project\isr_pgm\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2026-04-11 22:14:30.418
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY com.st.stm32cube.ide.mpu.remote.serial 1 1 2026-04-11 22:14:31.386
+!MESSAGE Executed PowerShell command powershell.exe -Command "Get-CimInstance -ClassName Win32_SerialPort | Select-Object -ExpandProperty DeviceID":
+
+
+!ENTRY com.st.stm32cube.ide.mpu.remote.serial 1 1 2026-04-11 22:14:31.387
+!MESSAGE port: 
+!SESSION 2026-04-11 22:15:21.589 -----------------------------------------------
+eclipse.buildId=Version 2.0.0
+java.version=21.0.8
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ko_KR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -data C:\Users\johnh\isr_pgm_project\isr_pgm
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2026-04-11 22:15:26.428
+!MESSAGE Log4j2 initialized with config file C:\Users\johnh\isr_pgm_project\isr_pgm\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2026-04-11 22:15:32.073
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY com.st.stm32cube.ide.mpu.remote.serial 1 1 2026-04-11 22:15:32.101
+!MESSAGE Executed PowerShell command powershell.exe -Command "Get-CimInstance -ClassName Win32_SerialPort | Select-Object -ExpandProperty DeviceID":
+
+
+!ENTRY com.st.stm32cube.ide.mpu.remote.serial 1 1 2026-04-11 22:15:32.102
+!MESSAGE port: 

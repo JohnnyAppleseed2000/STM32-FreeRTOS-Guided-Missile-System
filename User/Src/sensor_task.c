@@ -116,7 +116,7 @@ static SystemMode_t TrackTarget(uint16_t *angle, uint16_t *dist)
 		}
 	}
 	missing_count++;
-	// 표적이 15번 감지되지않을때
+	// 표적이 5번 감지되지않을때
 	if (missing_count < 5) {
 		return MODE_LOCKON; // 아직은 제자리에서 더 기다려봄
 	} else {
@@ -134,7 +134,7 @@ static SystemMode_t QuickSearch(uint16_t *angle, uint16_t *dist)
 	uint16_t temp_dist;
 
 	//총 3번 감지
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		//오른쪽
 		uint16_t r_angle = (base_angle + offset > MAX_PULSE) ? MAX_PULSE : base_angle + offset;
