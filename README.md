@@ -13,12 +13,26 @@
 
 ## 설계 구조
 - **태스크 분류**
-  - (1) Task_sensor (Priority 2) : *SEARCH-MODE* 에서 초음파 센서를 단 서브모터를 (45도 - 135도)로 회전시키며 물체를 탐지한다. 물체가 탐지되면 *LOCK-ON* 모드로 변경 후 CAN 통신을 통해 현재 모터의 각도와 물체와의 거리 데이터 전송.
+  - (1) Task_sensor (Priority 2) : 초음파 센서를 단 서브모터를 (45도 - 135도)로 회전시키며 물체를 탐지한다. 물체가 탐지되면 CAN 통신을 통해 현재 모터의 각도와 물체와의 거리 데이터 전송.
 
-  - (2) Task_guidance (Priority 3) : CAN Interrupt에서 Queue를 통해 데이터를 수신.  *LOCK-ON* 모드면 PID 함수를 통해 날개를 제어한다. 물체가 일정 거리안으로 들어오면 *HIT*로 상태변경. 물체가 감지 영역을 벗어나면 다시 *SEARCH-MODE* 로 전환.
+  - (2) Task_guidance (Priority 3) : CAN Interrupt에서 Queue를 통해 데이터를 수신.  수신된 거리와 각도 데이터를 PID 함수를 통해 날개를 제어한다. 
 
   - (3) Task_uart (Priority 1) : 현재 상태, 물체를 바라보는 각도, 거리, 그리고 PID 결과를 출력한다.
-  <br>
+<br>
+
+- **FSM(상태머신)**
+ ```mermaid
+stateDiagram-v2
+    direction LR
+
+    [*] --> SEARCH
+    
+    SEARCH --> LOCKON : 30cm 이내 타겟 감지 (Target Detected)
+    LOCKON --> HIT : 표적이 6cm 반경 내 진입 (HIT!)
+    
+    HIT --> SEARCH : 임무 완료 후 복귀
+    LOCKON --> SEARCH : 타겟 놓침 (Target Lost)
+```
 
 - **Real-time Task Scheduling:** FreeRTOS를 이용한 센서 읽기, 제어 연산, 모터 출력 태스크 분리
 - **PID Control:** 타겟과의 거리 및 각도 유지를 위한 정밀 제어 알고리즘 적용. 
@@ -59,9 +73,6 @@ $$u(t) = K_p e(t) + K_i \int_{0}^{t} e(\tau) d\tau + K_d \frac{de(t)}{dt}$$
 센서의 미세한 떨림과 노이즈를 제거하여 서보 모터의 지터(Jitter) 현상을 방지합니다.
 * **공식:** $y[n] = \alpha \cdot x[n] + (1 - \alpha) \cdot y[n-1]$
 * **설정:** $\alpha = 0.3$ (이전 데이터의 가중치를 높게 두어 급격한 변화 억제)
-
-##### 예외 처리 (Search Timeout)
-센서 데이터가 일시적으로 손실(0 또는 2000mm 초과)될 경우, **3회(약 60ms)** 동안은 이전의 유효한 데이터를 유지하여 제어의 연속성을 보장합니다.
 
 ---
 
