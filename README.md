@@ -14,11 +14,9 @@
 ## 설계 구조
 - **태스크 분류**
   - (1) Task_sensor (Priority 2) : *SEARCH-MODE* 에서 초음파 센서를 단 서브모터를 (45도 - 135도)로 회전시키며 물체를 탐지한다. 물체가 탐지되면 *LOCK-ON* 모드로 변경 후 CAN 통신을 통해 현재 모터의 각도와 물체와의 거리 데이터 전송.
-<center>
-  <p>↑ ↓</p>
-</center>
+
   - (2) Task_guidance (Priority 3) : CAN Interrupt에서 Queue를 통해 데이터를 수신.  *LOCK-ON* 모드면 PID 함수를 통해 날개를 제어한다. 물체가 일정 거리안으로 들어오면 *HIT*로 상태변경. 물체가 감지 영역을 벗어나면 다시 *SEARCH-MODE* 로 전환.
-  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;**↓**
+
   - (3) Task_uart (Priority 1) : 현재 상태, 물체를 바라보는 각도, 거리, 그리고 PID 결과를 출력한다.
   <br>
 
